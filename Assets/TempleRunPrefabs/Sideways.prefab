@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 6153805934963612981}
   - component: {fileID: 6689434456532396991}
   m_Layer: 6
-  m_Name: Turn
+  m_Name: Turn Treshold
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
