@@ -363,6 +363,7 @@
 -analyzer:"C:/Program Files/Unity/Hub/Editor/2022.3.21f1/Editor/Data/Tools/Unity.SourceGenerators/Unity.SourceGenerators.dll"
 "Assets/Input/PlayerControls.cs"
 "Assets/Scripts/PlayerMotor.cs"
+"Assets/Scripts/Scripts/GameOver.cs"
 "Assets/Scripts/Scripts/PlayerController.cs"
 "Assets/Scripts/Scripts/TileSpawner.cs"
 "Assets/TempleRunPrefabs/Tile.cs"

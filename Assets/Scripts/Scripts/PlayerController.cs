@@ -10,7 +10,7 @@ namespace TempleRun.Player
     public class PlayerController : MonoBehaviour
     {
         [SerializeField]
-        private float initialPlayerSpeed = 4f;
+        private float initialPlayerSpeed = 14f;
         [SerializeField]
         private float maximumPlayerSpeed = 30f;
         [SerializeField]
@@ -23,9 +23,17 @@ namespace TempleRun.Player
         private LayerMask groundLayer;
         [SerializeField]
         private LayerMask turnLayer;
-
-
+        [SerializeField] 
+        private LayerMask obstacleLayer;
+        [SerializeField] 
+        private Animator animator;
+        [SerializeField]
+        private AnimationClip slideAnimationClip;
+        [SerializeField]
         private float playerSpeed;
+        [SerializeField]
+        private float scoreMultiplier = 10f;
+
         private float gravity;
         private Vector3 movementDirection = Vector3.forward;
         private Vector3 playerVelocity;
@@ -36,14 +44,22 @@ namespace TempleRun.Player
         private InputAction slideAction;
 
         private CharacterController controller;
+        private int slidingAnimationId;
+        private bool sliding = false;
+        private float score = 0;
 
         [SerializeField]
         private UnityEvent<Vector3> turnEvent;
+        [SerializeField]
+        private UnityEvent<int> gameOverEvent;
+        [SerializeField]
+        private UnityEvent<int> scoreUpdateEvent;
 
         private void Awake()
         {
             playerInput = GetComponent<PlayerInput>();
             controller = GetComponent<CharacterController>();
+            slidingAnimationId = Animator.StringToHash("Sliding");
             turnAction = playerInput.actions["Turn"];
             jumpAction = playerInput.actions["Jump"];
             slideAction = playerInput.actions["Slide"];
@@ -76,6 +92,7 @@ namespace TempleRun.Player
             Vector3? turnPosition = CheckTurn(context.ReadValue<float>());
             if(!turnPosition.HasValue)
             {
+                GameOver();
                 return;
             }
             Vector3 targetDirection = 
@@ -104,7 +121,8 @@ namespace TempleRun.Player
 
         private void Turn(float turnValue, Vector3 turnPosition)
         {
-            Vector3 tempPlayerPosition = new Vector3(turnPosition.x, transform.position.y, turnPosition.z);
+            Vector3 tempPlayerPosition = new Vector3(turnPosition.x, 
+                transform.position.y, turnPosition.z);
             controller.enabled = false;
             transform.position = tempPlayerPosition;
             controller.enabled = true;
@@ -116,7 +134,29 @@ namespace TempleRun.Player
 
         private void PlayerSlide(InputAction.CallbackContext context)
         {
+            if(!sliding && IsGrounded())
+            {
+                StartCoroutine(Slide());
+            }
+        }
 
+        private IEnumerator Slide()
+        {
+            sliding = true;
+            // shrink the collider
+            Vector3 originalControllerCenter = controller.center;
+            Vector3 newControllerCenter = originalControllerCenter;
+            controller.height /= 2;
+            newControllerCenter.y -= controller.height/2;
+            controller.center = newControllerCenter;
+         
+            // play the sliding animation
+            animator.Play(slidingAnimationId);
+            yield return new WaitForSeconds(slideAnimationClip.length);
+            // set the character controller collider back to normal after sliding
+            controller.height *= 2;
+            controller.center = originalControllerCenter;
+            sliding = false;
         }
 
         private void PlayerJump(InputAction.CallbackContext context)
@@ -130,6 +170,16 @@ namespace TempleRun.Player
 
         private void Update()
         {
+            if (!IsGrounded(20f))
+            {
+                GameOver();
+                return;
+            }
+
+            //score functionality
+            score += scoreMultiplier * Time.deltaTime;
+            scoreUpdateEvent.Invoke((int)score);
+
             controller.Move(transform.forward * playerSpeed * Time.deltaTime);
             if (IsGrounded() && playerVelocity.y < 0)
             {
@@ -149,8 +199,8 @@ namespace TempleRun.Player
             raycastOriginFirst -= transform.forward * .2f;
             raycastOriginSecond += transform.forward * .2f;
 
-            Debug.DrawLine(raycastOriginFirst, Vector3.down, Color.green, 2f);
-            Debug.DrawLine(raycastOriginSecond, Vector3.down, Color.red, 2f);
+            //Debug.DrawLine(raycastOriginFirst, Vector3.down, Color.green, 2f);
+            //Debug.DrawLine(raycastOriginSecond, Vector3.down, Color.red, 2f);
 
             if (Physics.Raycast(raycastOriginFirst, Vector3.down, out RaycastHit hit, length, groundLayer) ||
                 (Physics.Raycast(raycastOriginSecond, Vector3.down, out RaycastHit hit2, length, groundLayer)))
@@ -158,6 +208,21 @@ namespace TempleRun.Player
                 return true;
             }
             return false;
+        }
+
+        private void GameOver()
+        {
+            Debug.Log("Game Over");
+            gameOverEvent.Invoke((int)score);
+            gameObject.SetActive(false);
+        }
+
+        private void OnControllerColliderHit(ControllerColliderHit hit)
+        {
+            if (((1<<hit.collider.gameObject.layer) & obstacleLayer)!=0)
+            {
+                GameOver();
+            }
         }
     }
 }
