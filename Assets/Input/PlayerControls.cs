@@ -24,98 +24,6 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
     ""name"": ""PlayerControls"",
     ""maps"": [
         {
-            ""name"": ""OnFoot"",
-            ""id"": ""0a9968df-e7d1-41ee-83bb-39434ccc6391"",
-            ""actions"": [
-                {
-                    ""name"": ""Movement"",
-                    ""type"": ""Button"",
-                    ""id"": ""6488248d-cba6-4f56-91bc-1f840ac1b2bc"",
-                    ""expectedControlType"": ""Button"",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""Jump"",
-                    ""type"": ""Button"",
-                    ""id"": ""dd2aa02e-f4a7-45be-816d-cf32ea5f968d"",
-                    ""expectedControlType"": ""Button"",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
-                }
-            ],
-            ""bindings"": [
-                {
-                    ""name"": ""WASD"",
-                    ""id"": ""3c9c2d25-527e-4d24-9fdf-745bb99c705f"",
-                    ""path"": ""2DVector"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Movement"",
-                    ""isComposite"": true,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": ""up"",
-                    ""id"": ""5db8bf9d-ca56-4370-b9bc-ef43489001bc"",
-                    ""path"": ""<Keyboard>/w"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""New control scheme"",
-                    ""action"": ""Movement"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": true
-                },
-                {
-                    ""name"": ""down"",
-                    ""id"": ""e190ae3c-5f9e-4e03-a2a3-368e88bdb101"",
-                    ""path"": ""<Keyboard>/s"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""New control scheme"",
-                    ""action"": ""Movement"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": true
-                },
-                {
-                    ""name"": ""left"",
-                    ""id"": ""f6ef811b-9708-463a-b302-bedb767efd50"",
-                    ""path"": ""<Keyboard>/a"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""New control scheme"",
-                    ""action"": ""Movement"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": true
-                },
-                {
-                    ""name"": ""right"",
-                    ""id"": ""ea5a884c-985e-4069-925a-3f1a9ac7b1f5"",
-                    ""path"": ""<Keyboard>/d"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""New control scheme"",
-                    ""action"": ""Movement"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": true
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""d0ce68c7-1ac6-4da1-a838-cd2cc63f2207"",
-                    ""path"": ""<Keyboard>/space"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""New control scheme"",
-                    ""action"": ""Jump"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                }
-            ]
-        },
-        {
             ""name"": ""Player"",
             ""id"": ""faceb945-13b5-4a0b-bbba-bf39e7f6c44a"",
             ""actions"": [
@@ -253,10 +161,6 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         }
     ]
 }");
-        // OnFoot
-        m_OnFoot = asset.FindActionMap("OnFoot", throwIfNotFound: true);
-        m_OnFoot_Movement = m_OnFoot.FindAction("Movement", throwIfNotFound: true);
-        m_OnFoot_Jump = m_OnFoot.FindAction("Jump", throwIfNotFound: true);
         // Player
         m_Player = asset.FindActionMap("Player", throwIfNotFound: true);
         m_Player_Turn = m_Player.FindAction("Turn", throwIfNotFound: true);
@@ -319,60 +223,6 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
     {
         return asset.FindBinding(bindingMask, out action);
     }
-
-    // OnFoot
-    private readonly InputActionMap m_OnFoot;
-    private List<IOnFootActions> m_OnFootActionsCallbackInterfaces = new List<IOnFootActions>();
-    private readonly InputAction m_OnFoot_Movement;
-    private readonly InputAction m_OnFoot_Jump;
-    public struct OnFootActions
-    {
-        private @PlayerControls m_Wrapper;
-        public OnFootActions(@PlayerControls wrapper) { m_Wrapper = wrapper; }
-        public InputAction @Movement => m_Wrapper.m_OnFoot_Movement;
-        public InputAction @Jump => m_Wrapper.m_OnFoot_Jump;
-        public InputActionMap Get() { return m_Wrapper.m_OnFoot; }
-        public void Enable() { Get().Enable(); }
-        public void Disable() { Get().Disable(); }
-        public bool enabled => Get().enabled;
-        public static implicit operator InputActionMap(OnFootActions set) { return set.Get(); }
-        public void AddCallbacks(IOnFootActions instance)
-        {
-            if (instance == null || m_Wrapper.m_OnFootActionsCallbackInterfaces.Contains(instance)) return;
-            m_Wrapper.m_OnFootActionsCallbackInterfaces.Add(instance);
-            @Movement.started += instance.OnMovement;
-            @Movement.performed += instance.OnMovement;
-            @Movement.canceled += instance.OnMovement;
-            @Jump.started += instance.OnJump;
-            @Jump.performed += instance.OnJump;
-            @Jump.canceled += instance.OnJump;
-        }
-
-        private void UnregisterCallbacks(IOnFootActions instance)
-        {
-            @Movement.started -= instance.OnMovement;
-            @Movement.performed -= instance.OnMovement;
-            @Movement.canceled -= instance.OnMovement;
-            @Jump.started -= instance.OnJump;
-            @Jump.performed -= instance.OnJump;
-            @Jump.canceled -= instance.OnJump;
-        }
-
-        public void RemoveCallbacks(IOnFootActions instance)
-        {
-            if (m_Wrapper.m_OnFootActionsCallbackInterfaces.Remove(instance))
-                UnregisterCallbacks(instance);
-        }
-
-        public void SetCallbacks(IOnFootActions instance)
-        {
-            foreach (var item in m_Wrapper.m_OnFootActionsCallbackInterfaces)
-                UnregisterCallbacks(item);
-            m_Wrapper.m_OnFootActionsCallbackInterfaces.Clear();
-            AddCallbacks(instance);
-        }
-    }
-    public OnFootActions @OnFoot => new OnFootActions(this);
 
     // Player
     private readonly InputActionMap m_Player;
@@ -443,11 +293,6 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             if (m_NewcontrolschemeSchemeIndex == -1) m_NewcontrolschemeSchemeIndex = asset.FindControlSchemeIndex("New control scheme");
             return asset.controlSchemes[m_NewcontrolschemeSchemeIndex];
         }
-    }
-    public interface IOnFootActions
-    {
-        void OnMovement(InputAction.CallbackContext context);
-        void OnJump(InputAction.CallbackContext context);
     }
     public interface IPlayerActions
     {

@@ -1,5 +1,12 @@
 {
   "dependencies": {
+    "com.lootlocker.lootlockersdk": {
+      "version": "2.2.0",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://package.openupm.com"
+    },
     "com.unity.cinemachine": {
       "version": "2.9.7",
       "depth": 0,

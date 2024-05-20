@@ -29,6 +29,10 @@ namespace TempleRun.Player
         private Animator animator;
         [SerializeField]
         private AnimationClip slideAnimationClip;
+
+        [SerializeField]
+        private AnimationClip runningJumpAnimationClip;
+
         [SerializeField]
         private float playerSpeed;
         [SerializeField]
@@ -45,6 +49,7 @@ namespace TempleRun.Player
 
         private CharacterController controller;
         private int slidingAnimationId;
+        private int runningJumpAnimationId;
         private bool sliding = false;
         private float score = 0;
 
@@ -60,10 +65,10 @@ namespace TempleRun.Player
             playerInput = GetComponent<PlayerInput>();
             controller = GetComponent<CharacterController>();
             slidingAnimationId = Animator.StringToHash("Sliding");
+            runningJumpAnimationId = Animator.StringToHash("RunningJump");
             turnAction = playerInput.actions["Turn"];
             jumpAction = playerInput.actions["Jump"];
             slideAction = playerInput.actions["Slide"];
-
         }
 
         private void OnEnable()
@@ -165,6 +170,8 @@ namespace TempleRun.Player
             {
                 playerVelocity.y += Mathf.Sqrt(jumpHeight * gravity * -3f);
                 controller.Move(playerVelocity * Time.deltaTime);
+                animator.Play(runningJumpAnimationId);
+                // new WaitForSeconds(runningJumpAnimationClip.length);
             }
         }
 
