@@ -59,7 +59,7 @@
     <UnityVersion>2022.3.21f1</UnityVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Analyzer Include="/Users/ivansmaliakou/.vscode/extensions/visualstudiotoolsforunity.vstuc-1.0.1/Analyzers/Microsoft.Unity.Analyzers.dll" />
+    <Analyzer Include="/Users/ivansmaliakou/.vscode/extensions/visualstudiotoolsforunity.vstuc-1.0.2/Analyzers/Microsoft.Unity.Analyzers.dll" />
     <Analyzer Include="/Users/ivansmaliakou/Unity/2022.3.21f1/Unity.app/Contents/Tools/Unity.SourceGenerators/Unity.SourceGenerators.dll" />
     <Analyzer Include="/Users/ivansmaliakou/Unity/2022.3.21f1/Unity.app/Contents/Tools/Unity.SourceGenerators/Unity.Properties.SourceGenerator.dll" />
   </ItemGroup>
@@ -67,6 +67,7 @@
     <Compile Include="Assets/Scripts/Scripts/TileSpawner.cs" />
     <Compile Include="Assets/Input/PlayerControls.cs" />
     <Compile Include="Assets/Scripts/PlayerMotor.cs" />
+    <Compile Include="Assets/Scripts/Scripts/ScoreUpdater.cs" />
     <Compile Include="Assets/Scripts/Scripts/GameManager.cs" />
     <Compile Include="Assets/TempleRunPrefabs/Tile.cs" />
     <Compile Include="Assets/Scripts/Scripts/PlayerController.cs" />

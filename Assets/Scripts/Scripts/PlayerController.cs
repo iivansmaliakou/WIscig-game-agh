@@ -35,6 +35,9 @@ namespace TempleRun.Player
 
         [SerializeField]
         private float playerSpeed;
+
+        private float rotationSpeed = 20;
+        
         [SerializeField]
         private float scoreMultiplier = 10f;
 
@@ -103,7 +106,7 @@ namespace TempleRun.Player
             Vector3 targetDirection = 
                 Quaternion.AngleAxis(90*context.ReadValue<float>(),Vector3.up) * movementDirection;
             turnEvent.Invoke(targetDirection);
-            Turn(context.ReadValue<float>(),turnPosition.Value);
+            Turn(context.ReadValue<float>(), turnPosition.Value);
         }
 
         private Vector3? CheckTurn(float turnValue)
@@ -157,7 +160,7 @@ namespace TempleRun.Player
          
             // play the sliding animation
             animator.Play(slidingAnimationId);
-            yield return new WaitForSeconds(slideAnimationClip.length);
+            yield return new WaitForSeconds(slideAnimationClip.length / animator.speed);
             // set the character controller collider back to normal after sliding
             controller.height *= 2;
             controller.center = originalControllerCenter;
@@ -194,6 +197,13 @@ namespace TempleRun.Player
             }
             playerVelocity.y += gravity * Time.deltaTime;
             controller.Move(playerVelocity * Time.deltaTime);
+            if (playerSpeed < maximumPlayerSpeed){
+                playerSpeed += Time.deltaTime * playerSpeedIncreaseRate;
+                gravity = initialGravityValue - playerSpeed;
+                if (animator.speed < 1.25f){
+                    animator.speed += (1/playerSpeed) * Time.deltaTime;
+                }
+            }
         }
 
         private bool IsGrounded(float length = .2f)

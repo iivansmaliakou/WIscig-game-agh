@@ -2,14 +2,16 @@ using System.Collections;
 using UnityEngine;
 using LootLocker.Requests;
 using TMPro;
+using UnityEngine.SceneManagement;
+using System;
 
 public class GameOver : MonoBehaviour
-{
-    [SerializeField]
-    private GameObject gameOverCanvas;
-    
+{   
     [SerializeField]
     private TMP_InputField inputField;
+
+    [SerializeField]
+    private TextMeshProUGUI scoreText;
 
     [SerializeField]
     private TextMeshProUGUI leaderboardNameText;
@@ -25,14 +27,9 @@ public class GameOver : MonoBehaviour
 
     public void StopGame(int score)
     {
-      gameOverCanvas.SetActive(true);
       this.score = score;
-      this.SubmitScore();
-    }
-
-    public void RestartLevel()
-    {
-
+      scoreText.text = score.ToString();
+      GetLeaderboard();
     }
 
     public void SubmitScore()
@@ -54,7 +51,7 @@ public class GameOver : MonoBehaviour
       yield return new WaitUntil(()=> nameSet.HasValue);
       if (!nameSet.Value) yield break;
       bool? scoreSubmitted = null;
-      LootLockerSDKManager.SubmitScore("", score, leaderboardID, (response) => {
+      LootLockerSDKManager.SubmitScore(inputField.text, score, leaderboardID, (response) => {
          if (response.success){
           Debug.Log("Successfully submitted score to the leaderboard");
           scoreSubmitted = true;
@@ -75,16 +72,19 @@ public class GameOver : MonoBehaviour
           string leaderboardName = "";
           string leaderboardScore = "";
           LootLockerLeaderboardMember[] members = response.items;
-          for (int i = 0; i < members.Length; i++) {
-            LootLockerPlayer player = members[i].player;
-            if (members[i].player == null) continue;
-            if (members[i].player.name != "") {
-              leaderboardName += members[i].player.name + "\n";
-            } else {
-              leaderboardName += members[i].player.id + "\n";
-            }
-            leaderboardScore += members[i].score  + "\n";
+          if (members != null){
+            for (int i = 0; i < members.Length; i++) {
+              LootLockerPlayer player = members[i].player;
+              if (members[i].player == null) continue;
+              if (members[i].player.name != "") {
+                leaderboardName += members[i].player.name + "\n";
+              } else {
+                leaderboardName += members[i].player.id + "\n";
+              }
+              leaderboardScore += members[i].score  + "\n";
           }
+          }
+          
           leaderboardNameText.SetText(leaderboardName);
           leaderboardScoreText.SetText(leaderboardScore);
         } else {
@@ -95,5 +95,8 @@ public class GameOver : MonoBehaviour
     public void AddXP(int score)
     {
 
+    }
+    public void ReloadScene(){
+      SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }

@@ -32,7 +32,7 @@ namespace TempleRun
             Random.InitState(System.DateTime.Now.Millisecond);
 
             for(int i = 0; i < tileStartCount; i++) {
-                SpawnTile(startingTile.GetComponent<Tile>());
+                SpawnTile(startingTile.GetComponent<Tile>(), false);
              }
 
             SpawnTile(SelectRandomGameObjectFromList(turnTiles).GetComponent<Tile>());
@@ -102,7 +102,7 @@ namespace TempleRun
 
         private void SpawnObstacle()
         {
-            if (Random.value > 0.2f) return;
+            if (Random.value > 0.3f) return;
 
             GameObject obstaclePrefab = SelectRandomGameObjectFromList(obstacles);
 
