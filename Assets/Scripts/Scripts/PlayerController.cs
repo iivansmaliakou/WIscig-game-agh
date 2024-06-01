@@ -13,6 +13,7 @@ namespace TempleRun.Player
         private float initialPlayerSpeed = 14f;
         [SerializeField]
         private float maximumPlayerSpeed = 30f;
+
         [SerializeField]
         private float playerSpeedIncreaseRate = .1f;
         [SerializeField]
@@ -36,8 +37,14 @@ namespace TempleRun.Player
         [SerializeField]
         private float playerSpeed;
 
-        private float rotationSpeed = 20;
+        private float rotationSpeed = 5;
+        private float currentRotation = .0f;
+        private Quaternion targetRotationDegrees;
+
+        private Vector3? targetTempPosition;
         
+        private float speedBeforeRotation = 0;
+
         [SerializeField]
         private float scoreMultiplier = 10f;
 
@@ -106,7 +113,9 @@ namespace TempleRun.Player
             Vector3 targetDirection = 
                 Quaternion.AngleAxis(90*context.ReadValue<float>(),Vector3.up) * movementDirection;
             turnEvent.Invoke(targetDirection);
-            Turn(context.ReadValue<float>(), turnPosition.Value);
+            this.targetRotationDegrees = transform.rotation * Quaternion.Euler(0,90*context.ReadValue<float>(),0);
+            this.speedBeforeRotation = this.playerSpeed;
+            this.targetTempPosition = turnPosition;
         }
 
         private Vector3? CheckTurn(float turnValue)
@@ -127,7 +136,7 @@ namespace TempleRun.Player
             return null;
         }
 
-        private void Turn(float turnValue, Vector3 turnPosition)
+        private void Turn(Vector3 turnPosition)
         {
             Vector3 tempPlayerPosition = new Vector3(turnPosition.x, 
                 transform.position.y, turnPosition.z);
@@ -135,9 +144,14 @@ namespace TempleRun.Player
             transform.position = tempPlayerPosition;
             controller.enabled = true;
 
-            Quaternion targetRotation = transform.rotation * Quaternion.Euler(0,90*turnValue,0);
-            transform.rotation = targetRotation;
+            transform.rotation = this.targetRotationDegrees;
             movementDirection = transform.forward.normalized;
+        }
+
+        private void PreTurn(Quaternion turnValueAngle, Vector3 turnPosition)
+        {
+            transform.position = Vector3.Slerp(transform.position, turnPosition, Time.deltaTime * this.speedBeforeRotation * rotationSpeed);
+            transform.rotation = Quaternion.Slerp(transform.rotation, turnValueAngle, Time.deltaTime * rotationSpeed);
         }
 
         private void PlayerSlide(InputAction.CallbackContext context)
@@ -204,20 +218,34 @@ namespace TempleRun.Player
                     animator.speed += (1/playerSpeed) * Time.deltaTime;
                 }
             }
+
+            // handle slow turning
+            if (this.targetTempPosition != null){
+                if (Quaternion.Angle(transform.rotation, targetRotationDegrees) >= 0.1f)
+                {
+                    this.playerSpeed = 0.0f;
+                    this.PreTurn(this.targetRotationDegrees, this.targetTempPosition.Value);
+                } else {
+                    this.Turn(this.targetTempPosition.Value); 
+                    this.playerSpeed = this.speedBeforeRotation;
+                    this.targetTempPosition = null;
+                    this.speedBeforeRotation = 0.0f;
+                }
+            }
         }
 
         private bool IsGrounded(float length = .2f)
         {
             Vector3 raycastOriginFirst = transform.position;
-            raycastOriginFirst.y -= controller.height / 2f;
+            //raycastOriginFirst.y -= controller.height / 2f;
             raycastOriginFirst.y += .1f;
 
             Vector3 raycastOriginSecond = raycastOriginFirst;
             raycastOriginFirst -= transform.forward * .2f;
             raycastOriginSecond += transform.forward * .2f;
 
-            //Debug.DrawLine(raycastOriginFirst, Vector3.down, Color.green, 2f);
-            //Debug.DrawLine(raycastOriginSecond, Vector3.down, Color.red, 2f);
+            // Debug.DrawLine(raycastOriginFirst, Vector3.down, Color.green, 2f);
+            // Debug.DrawLine(raycastOriginSecond, Vector3.down, Color.red, 2f);
 
             if (Physics.Raycast(raycastOriginFirst, Vector3.down, out RaycastHit hit, length, groundLayer) ||
                 (Physics.Raycast(raycastOriginSecond, Vector3.down, out RaycastHit hit2, length, groundLayer)))
